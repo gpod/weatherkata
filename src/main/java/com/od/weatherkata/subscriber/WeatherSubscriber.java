@@ -1,6 +1,7 @@
 package com.od.weatherkata.subscriber;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
@@ -30,34 +31,52 @@ public class WeatherSubscriber {
         connectPressureDifference();
     }
 
-    private void connectStatusPanel() {
-        //TODO - provide code to set the temperature, precipitation and wind strength
-        //TODO - suppress sending any duplicate values which are unchanged
-        //temperature.subscribe(System.out::println);
-
-        uiControl.setTemperature(0);
-        uiControl.setPrecipitation("Unknown");
-        uiControl.setWindStrength(0);
+    private void connectStatusPanel() {        
+        temperature.distinctUntilChanged().subscribe(uiControl::setTemperature);
+        precipitation.distinctUntilChanged().subscribe(uiControl::setPrecipitation);
+        windStrength.distinctUntilChanged().subscribe(uiControl::setWindStrength);        
     }
 
     private void connectSnowMobile() {
-        //TODO - provide code to enable the snow mobile if the temperature is < 0
+        temperature.map(t -> t <= 0)
+                .distinctUntilChanged()
+                .subscribe(uiControl::setSnowMobileEnabled);
     }
 
     private void connectBalloon() {
-        //TODO - provide code to enable the balloon if the wind is < 5 and the precipitation != Fish
+        Flux<Boolean> goodWind = windStrength.map(w -> w < 5);
+        Flux<Boolean> noFish = precipitation.map(p -> !p.equals("Fish"));
+        Flux.combineLatest(goodWind, noFish, (w, f) -> w && f)
+                .distinctUntilChanged()
+                .subscribe(uiControl::setBalloonEnabled);
     }
 
     private void connectTrain() {
-        //TODO - provide code to enable the Thameslink train if the wind is 0, temp = 18 and the precipitation == Fish
+        Flux<Boolean> goodTemp = temperature.map(t -> t == 18);
+        Flux<Boolean> noWind = windStrength.map(w -> w == 0);
+        Flux<Boolean> fishing = precipitation.map("Fish"::equals);
+
+        Flux<Boolean> canCommute = goodTemp
+                .withLatestFrom(noWind, (t, w) -> t && w)
+                .withLatestFrom(fishing, (c, p) -> c && p);
+
+        canCommute.distinctUntilChanged().subscribe(uiControl::setTrainEnabled);
     }
 
     private void connectPressure() {
-        //TODO - provide code to set the low pressure and high pressure
+        pressureLow.distinctUntilChanged().subscribe(uiControl::setLowPressure);
+        pressureHigh.distinctUntilChanged().subscribe(uiControl::setHighPressure);        
     }
 
     private void connectPressureDifference() {
-        //TODO - provide code to set the difference in pressure
+        Flux<Integer> differences = pressureDeltas
+                .flatMap(d -> {
+                    Mono<Integer> high = Mono.justOrEmpty(d.get("highPressure"));
+                    Mono<Integer> low = Mono.justOrEmpty(d.get("lowPressure"));
+                    return high.zipWith(low, (h, l) -> h - l);
+                });
+        
+        differences.subscribe(uiControl::setPressureDifference);
     }
 
     public void subscribe() {
