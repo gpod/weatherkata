@@ -2,8 +2,8 @@ package com.od.weatherkata.subscriber;
 
 import javafx.application.Platform;
 import org.zeromq.ZMQ;
-import rx.Observable;
-import rx.subjects.BehaviorSubject;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,13 +15,13 @@ import java.util.regex.Pattern;
  */
 public class SocketSubscriber {
 
-    private BehaviorSubject<String> precipitationObservable = BehaviorSubject.create();
-    private BehaviorSubject<Integer> temperatureObservable = BehaviorSubject.create();
-    private BehaviorSubject<Integer> windStrengthObservable = BehaviorSubject.create();
+    private EmitterProcessor<String> precipitationObservable = EmitterProcessor.create();
+    private EmitterProcessor<Integer> temperatureObservable = EmitterProcessor.create();
+    private EmitterProcessor<Integer> windStrengthObservable = EmitterProcessor.create();
 
-    private BehaviorSubject<Integer> lowPressureObservable = BehaviorSubject.create();
-    private BehaviorSubject<Integer> highPressureObservable = BehaviorSubject.create();
-    private BehaviorSubject<Map<String, Integer>> pressureDeltasObservable = BehaviorSubject.create();
+    private EmitterProcessor<Integer> lowPressureObservable = EmitterProcessor.create();
+    private EmitterProcessor<Integer> highPressureObservable = EmitterProcessor.create();
+    private EmitterProcessor<Map<String, Integer>> pressureDeltasObservable = EmitterProcessor.create();
 
     private ZMQ.Socket subscriber;
     private ZMQ.Context context;
@@ -115,27 +115,27 @@ public class SocketSubscriber {
         Platform.runLater(r);
     }
 
-    public Observable<String> getPrecipitationObservable() {
+    public Flux<String> getPrecipitationObservable() {
         return precipitationObservable;
     }
 
-    public Observable<Integer> getTemperatureObservable() {
+    public Flux<Integer> getTemperatureObservable() {
         return temperatureObservable;
     }
 
-    public Observable<Integer> getWindStrengthObservable() {
+    public Flux<Integer> getWindStrengthObservable() {
         return windStrengthObservable;
     }
-
-    public BehaviorSubject<Integer> getHighPressureObservable() {
+    
+    public Flux<Integer> getHighPressureObservable() {
         return highPressureObservable;
     }
 
-    public BehaviorSubject<Integer> getLowPressureObservable() {
+    public Flux<Integer> getLowPressureObservable() {
         return lowPressureObservable;
     }
 
-    public BehaviorSubject<Map<String, Integer>> getPressureDeltasObservable() {
+    public Flux<Map<String, Integer>> getPressureDeltasObservable() {
         return pressureDeltasObservable;
     }
 }

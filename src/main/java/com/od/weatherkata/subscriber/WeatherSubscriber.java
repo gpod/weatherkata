@@ -1,6 +1,6 @@
 package com.od.weatherkata.subscriber;
 
-import rx.Observable;
+import reactor.core.publisher.Flux;
 
 import java.util.Map;
 
@@ -11,12 +11,12 @@ public class WeatherSubscriber {
 
     private SocketSubscriber socketSubscriber = new SocketSubscriber();
 
-    private Observable<String> precipitation = socketSubscriber.getPrecipitationObservable();
-    private Observable<Integer> temperature = socketSubscriber.getTemperatureObservable();
-    private Observable<Integer> windStrength = socketSubscriber.getWindStrengthObservable();
-    private Observable<Integer> pressureLow = socketSubscriber.getLowPressureObservable();
-    private Observable<Integer> pressureHigh = socketSubscriber.getHighPressureObservable();
-    private Observable<Map<String,Integer>> pressureDeltas = socketSubscriber.getPressureDeltasObservable();
+    private Flux<String> precipitation = socketSubscriber.getPrecipitationObservable();
+    private Flux<Integer> temperature = socketSubscriber.getTemperatureObservable();
+    private Flux<Integer> windStrength = socketSubscriber.getWindStrengthObservable();
+    private Flux<Integer> pressureLow = socketSubscriber.getLowPressureObservable();
+    private Flux<Integer> pressureHigh = socketSubscriber.getHighPressureObservable();
+    private Flux<Map<String,Integer>> pressureDeltas = socketSubscriber.getPressureDeltasObservable();
 
     private WeatherSubscriberControl uiControl;
 
